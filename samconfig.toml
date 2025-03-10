@@ -3,7 +3,7 @@ version = 0.1
 [default.deploy]
 [default.deploy.parameters]
 stack_name = "nestjs-fastify-lambda-dev"
-s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-hbjwfxw3ma34"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-hswjm75ikopq"
 s3_prefix = "nestjs-fastify-lambda-dev"
 region = "ap-northeast-2"
 capabilities = "CAPABILITY_IAM"

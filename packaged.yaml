@@ -13,7 +13,7 @@ Resources:
   NestjsFastifyFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-hbjwfxw3ma34/eb560be4ff886030a5e0470549c5f9b4
+      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-hbjwfxw3ma34/nestjs-fastify-lambda-dev
       Handler: dist/lambda.handler
       Architectures:
       - arm64
