@@ -14,9 +14,11 @@ module.exports = {
     lambda: './lambda.ts',
   },
   target: 'node',
-  mode: 'development',
+  mode: 'production',
   externals: [
     ({ request }, callback) => {
+      console.log('request', request);
+      
       if (layerDependencies.includes(request)) {
         return callback(null, `commonjs ${request}`);
       }

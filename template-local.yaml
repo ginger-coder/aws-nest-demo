@@ -1,82 +1,76 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
+
 Globals:
   Function:
     Timeout: 30
     MemorySize: 1024
     Runtime: nodejs20.x
-    Architectures:
-    - arm64
+    Architectures: ['arm64']
     Environment:
       Variables:
-        NODE_OPTIONS: --enable-source-maps
+        NODE_OPTIONS: '--enable-source-maps'
     EphemeralStorage:
       Size: 512
   Api:
     OpenApiVersion: '2.0'
     Cors:
-      AllowMethods: '''*'''
-      AllowHeaders: '''Content-Type,Authorization'''
-      AllowOrigin: '''*'''
+      AllowMethods: "'*'"
+      AllowHeaders: "'Content-Type,Authorization'"
+      AllowOrigin: "'*'"
       MaxAge: 600
+
 Resources:
   NodeModulesLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: nest-dependencies
       Description: Node modules for Nest.js application
-      ContentUri: s3://aws-nest-demo-dev/e2fded1863193e30d4bc70945b4f76cf
+      ContentUri: lambda-layer/
       CompatibleRuntimes:
-      - nodejs20.x
+        - nodejs20.x
       RetentionPolicy: Retain
-    Metadata:
-      SamResourceId: NodeModulesLayer
+
   Api:
     Type: AWS::Serverless::Api
     Properties:
       StageName: dev
       BinaryMediaTypes:
-      - image/*
-      - multipart/form-data
+        - 'image/*'
+        - 'multipart/form-data'
       Auth:
         DefaultAuthorizer: NONE
-    Metadata:
-      SamResourceId: Api
+
   NestjsFunction:
     Type: AWS::Serverless::Function
     Metadata:
       SkipBuild: true
-      SamResourceId: NestjsFunction
     Properties:
       Handler: lambda.handler
-      CodeUri: s3://aws-nest-demo-dev/bcb921b4fcdb3bbfcab6b667bb3fcc01
+      CodeUri: ./dist
       MemorySize: 3008
       Timeout: 30
       Layers:
-      - Ref: NodeModulesLayer
+        - !Ref NodeModulesLayer
       Policies:
-      - S3CrudPolicy:
-          BucketName: aladdinagi-assets
-      - VPCAccessPolicy: {}
+        - S3CrudPolicy:
+            BucketName: aladdinagi-assets
+        - VPCAccessPolicy: {}
       Events:
         ApiEvent:
           Type: Api
           Properties:
             Path: /{proxy+}
             Method: ANY
-            RestApiId:
-              Ref: Api
+            RestApiId: !Ref Api
             Auth:
               Authorizer: NONE
       AutoPublishAlias: live
+
 Outputs:
   ApiEndpoint:
     Description: API Gateway endpoint URL
-    Value:
-      Fn::Sub: https://${Api}.execute-api.${AWS::Region}.amazonaws.com/dev
+    Value: !Sub 'https://${Api}.execute-api.${AWS::Region}.amazonaws.com/dev'
   FunctionArn:
     Description: Lambda Function ARN
-    Value:
-      Fn::GetAtt:
-      - NestjsFunction
-      - Arn
+    Value: !GetAtt NestjsFunction.Arn
