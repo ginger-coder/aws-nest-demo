@@ -11,7 +11,7 @@ rm -rf dist
 
 # 1. 构建 Nest.js 应用
 echo "正在构建 Nest.js 应用..."
-pnpm run build
+yarn run build
 
 # 2. 构建 SAM 应用
 echo "正在构建 SAM 应用..."

@@ -1,57 +1,57 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Nest.js API with Fastify deployed on AWS Lambda with API Gateway v0.0.1
+Description: NestJS Application with Fastify on Lambda
 Globals:
   Function:
     Timeout: 30
     MemorySize: 512
-    Runtime: nodejs20.x
-    Environment:
-      Variables:
-        NODE_ENV: production
+    Runtime: nodejs18.x
 Resources:
-  NestjsFastifyFunction:
+  NestJsApi:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://aws-sam-cli-managed-default-samclisourcebucket-hbjwfxw3ma34/nestjs-fastify-lambda-dev
+      CodeUri: ./dist
       Handler: dist/lambda.handler
-      Architectures:
-      - arm64
+      Environment:
+        Variables:
+          NODE_ENV: production
       Events:
-        ApiEvent:
-          Type: Api
+        HttpApiEvent:
+          Type: HttpApi
           Properties:
+            ApiId:
+              Ref: ApiGateway
             Path: /{proxy+}
             Method: ANY
-        ApiRootEvent:
-          Type: Api
+        RootPath:
+          Type: HttpApi
           Properties:
+            ApiId:
+              Ref: ApiGateway
             Path: /
             Method: ANY
     Metadata:
-      SamResourceId: NestjsFastifyFunction
-  NestjsLogGroup:
-    Type: AWS::Logs::LogGroup
+      SamResourceId: NestJsApi
+  ApiGateway:
+    Type: AWS::Serverless::HttpApi
     Properties:
-      LogGroupName:
-        Fn::Sub: /aws/lambda/${NestjsFastifyFunction}
-      RetentionInDays: 7
+      CorsConfiguration:
+        AllowOrigins:
+        - '*'
+        AllowHeaders:
+        - '*'
+        AllowMethods:
+        - '*'
     Metadata:
-      SamResourceId: NestjsLogGroup
+      SamResourceId: ApiGateway
 Outputs:
-  NestjsApi:
-    Description: API Gateway endpoint URL for Prod stage for Nest.js function
+  NestJsApiEndpoint:
+    Description: API Gateway endpoint URL
     Value:
-      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/
-  NestjsFunction:
-    Description: Nest.js Lambda Function ARN
-    Value:
-      Fn::GetAtt:
-      - NestjsFastifyFunction
-      - Arn
-  NestjsFunctionRole:
-    Description: IAM Role created for Nest.js Lambda function
+      Fn::Sub: https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/dev
+  NestJsFunction:
+    Description: Lambda Function ARN
     Value:
       Fn::GetAtt:
-      - NestjsFastifyFunctionRole
+      - NestJsApi
       - Arn
